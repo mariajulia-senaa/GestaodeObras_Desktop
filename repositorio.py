@@ -1,7 +1,5 @@
 """Persistência em SQLite (Nível 3).
 
-O repositório carrega e grava o agregado completo: uma Obra com suas Etapas e
-os Recursos de cada Etapa. As regras de negócio continuam no domínio.
 """
 from __future__ import annotations
 
@@ -80,7 +78,6 @@ class RepositorioSQLite:
     def fechar(self) -> None:
         self._con.close()
 
-    # ---------- Obras ----------
 
     def cadastrar(self, obra: Obra) -> Obra:
         if self.contem_id(obra.id):
@@ -96,7 +93,7 @@ class RepositorioSQLite:
                 "ON CONFLICT(id) DO UPDATE SET nome = excluded.nome, status = excluded.status",
                 (obra.id, obra.nome, obra.status.value),
             )
-            self._con.execute("DELETE FROM etapa WHERE obra_id = ?", (obra.id,))  # recursos saem em cascata
+            self._con.execute("DELETE FROM etapa WHERE obra_id = ?", (obra.id,))
             for e in obra.etapas:
                 self._con.execute(
                     "INSERT INTO etapa (obra_id, id, nome, status, percentual, inicio_planejado, "
@@ -132,7 +129,6 @@ class RepositorioSQLite:
     def contem(self, obra: Obra) -> bool:
         return self.contem_id(obra.id)
 
-    # ---------- Engenheiros ----------
 
     def cadastrar_engenheiro(self, engenheiro: Engenheiro) -> Engenheiro:
         if self.buscar_engenheiro(engenheiro.nome) is not None:
@@ -166,7 +162,6 @@ class RepositorioSQLite:
                 [(engenheiro.nome, o.id) for o in engenheiro.obras_alocadas],
             )
 
-    # ---------- Mapeamento interno ----------
 
     @staticmethod
     def _decompor_recurso(recurso: Recurso) -> tuple[str, float, float]:

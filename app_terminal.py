@@ -42,7 +42,6 @@ class AppTerminal:
         self.relatorio = GerarRelatorioKPIs(repositorio)
         self.usuario: Optional[Engenheiro] = None
 
-    # ---------- entrada e saída ----------
 
     def _ler(self, prompt: str) -> str:
         try:
@@ -65,7 +64,6 @@ class AppTerminal:
             self._say(f"  {chave}. {texto}")
         return self._ler("\nEscolha uma opção: ")
 
-    # ---------- fluxo principal ----------
 
     def executar(self) -> None:
         try:
@@ -128,7 +126,6 @@ class AppTerminal:
         except ErroValidacao as e:
             self._say(f"\n[Erro de validação] {e}")
 
-    # ---------- seleção ----------
 
     def _escolher_obra(self, obras: list[Obra], vazio: str) -> Obra:
         if not obras:
@@ -153,7 +150,6 @@ class AppTerminal:
             raise ErroPreCondicao("Etapa não encontrada nesta obra")
         return id_etapa
 
-    # ---------- ações ----------
 
     def _criar_conta(self) -> None:
         nome = self._ler("Nome de usuário: ")

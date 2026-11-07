@@ -46,7 +46,7 @@ class TestPersistencia(unittest.TestCase):
             self.assertAlmostEqual(etapa.custo_recursos(), 10 * 35.5 + 8 * 50)
         finally:
             novo.fechar()
-            self.repo = RepositorioSQLite(self.caminho)  # para o tearDown fechar
+            self.repo = RepositorioSQLite(self.caminho)
 
     def test_id_de_obra_duplicado_e_rejeitado(self):
         CadastrarObra(self.repo).executar("1", "A")
@@ -176,18 +176,18 @@ class TestMenuTerminal(unittest.TestCase):
         repo = RepositorioSQLite()
         try:
             saida = self.rodar(repo, [
-                "2", "ana", "segredo",            # criar conta
-                "1", "ana", "segredo",            # entrar
-                "1", "1", "Residencial",          # cadastrar obra
+                "2", "ana", "segredo",
+                "1", "ana", "segredo",
+                "1", "1", "Residencial",
                 "3", "1", "Fundação", "01/10/2026", "15/10/2026", "15000",
                 "4", "1", "1", "1", "Cimento", "10", "35",
                 "4", "1", "1", "2", "Betoneira", "8", "50",
-                "2",                              # listar
+                "2",
                 "5", "1", "1", "01/10/2026", "18/10/2026", "", "100",
-                "6", "1",                         # KPIs
-                "7", "1",                         # concluir
-                "9",                              # minhas obras
-                "0", "0",                         # sair da conta e do sistema
+                "6", "1",
+                "7", "1",
+                "9",
+                "0", "0",
             ])
             self.assertIn("Obra 'Residencial' cadastrada", saida)
             self.assertIn("Material 'Cimento' adicionado", saida)
@@ -208,9 +208,9 @@ class TestMenuTerminal(unittest.TestCase):
             saida = self.rodar(repo, [
                 "2", "ana", "segredo", "1", "ana", "errada",
                 "1", "ana", "segredo",
-                "1", "xx", "Obra",               # código inválido
-                "6",                             # KPIs sem obras
-                "x",                             # opção inválida
+                "1", "xx", "Obra",
+                "6",
+                "x",
                 "0", "0",
             ])
             self.assertIn("Usuário ou senha inválidos", saida)

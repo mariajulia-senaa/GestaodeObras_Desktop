@@ -1,8 +1,5 @@
 """Camada de domínio do Sistema de Gestão de Obras (Nível 3).
 
-Contém as exceções, os validadores e as entidades. Nada aqui conhece banco de
-dados ou interface: essas responsabilidades ficam em repositorio.py e
-app_terminal.py.
 """
 from __future__ import annotations
 
@@ -14,8 +11,6 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Optional
 
-
-# 1. EXCEÇÕES E VALIDADORES
 
 class ErroValidacao(Exception):
     """Dado informado pelo usuário é inválido."""
@@ -92,8 +87,6 @@ class Validador:
             raise ErroValidacao("Término não pode ser antes do início")
 
 
-# 2. DOMÍNIO
-
 class StatusObra(str, Enum):
     EM_ANDAMENTO = "Em Andamento"
     CONCLUIDA = "Concluída"
@@ -104,8 +97,6 @@ class StatusEtapa(str, Enum):
     EM_ANDAMENTO = "Em Andamento"
     CONCLUIDA = "Concluída"
 
-
-# ---------- Recursos (herança + polimorfismo) ----------
 
 class Recurso(ABC):
     def __init__(self, nome: str):
@@ -138,8 +129,6 @@ class Equipamento(Recurso):
         return self.horas_uso * self.taxa_por_hora
 
 
-# ---------- Etapa (composta por recursos) ----------
-
 class Etapa:
     def __init__(self, id_etapa: int, nome: str):
         self.id = id_etapa
@@ -148,17 +137,14 @@ class Etapa:
         self.percentual_conclusao = 0.0
         self._recursos: list[Recurso] = []
 
-        # Planejado
         self.data_inicio_planejada: Optional[date] = None
         self.data_fim_planejada: Optional[date] = None
         self.custo_planejado: Optional[float] = None
 
-        # Real
         self.data_inicio_real: Optional[date] = None
         self.data_fim_real: Optional[date] = None
         self.custo_real = 0.0
 
-    # --- consultas ---
     @property
     def recursos(self) -> tuple[Recurso, ...]:
         return tuple(self._recursos)
@@ -172,7 +158,6 @@ class Etapa:
     def custo_recursos(self) -> float:
         return sum(r.calcular_custo_total() for r in self._recursos)
 
-    # --- comandos ---
     def adicionar_recurso(self, recurso: Recurso) -> None:
         self._recursos.append(recurso)
 
@@ -209,8 +194,6 @@ class Etapa:
     def __repr__(self) -> str:
         return f"Etapa({self.id}, {self.nome!r}, {self.status.value})"
 
-
-# ---------- Obra (composta por etapas) ----------
 
 class Obra:
     def __init__(self, id_obra: int, nome_obra: str, status: StatusObra = StatusObra.EM_ANDAMENTO):
@@ -250,8 +233,6 @@ class Obra:
         return f"Obra({self.id}, {self.nome!r}, {self.status.value})"
 
 
-# ---------- Usuários (herança + associação com Obra) ----------
-
 class Usuario:
     """Usuário do sistema. A senha nunca é guardada em texto puro: só salt + hash."""
 
@@ -261,7 +242,7 @@ class Usuario:
     def __init__(self, nome: str, senha: Optional[str] = None, *,
                  salt: Optional[bytes] = None, senha_hash: Optional[bytes] = None):
         self.nome = Validador.texto_obrigatorio(nome, "Nome do usuário é obrigatório")
-        if senha_hash is not None and salt is not None:  # reconstituído do banco
+        if senha_hash is not None and salt is not None:
             self._salt, self._hash = salt, senha_hash
         else:
             senha = Validador.texto_obrigatorio(senha, "Senha é obrigatória")

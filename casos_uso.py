@@ -1,7 +1,5 @@
 """Casos de uso do sistema (Nível 3).
 
-Cada caso de uso valida as pré-condições, aplica a regra no domínio e pede ao
-repositório para persistir o resultado.
 """
 from __future__ import annotations
 
@@ -16,8 +14,6 @@ from dominio import (
 )
 from repositorio import RepositorioSQLite
 
-
-# ---------- Obras e etapas ----------
 
 class CadastrarObra:
     def __init__(self, repositorio: RepositorioSQLite):
@@ -88,8 +84,6 @@ def _obra_cadastrada_em_andamento(repositorio: RepositorioSQLite, obra: Obra) ->
     return atual
 
 
-# ---------- Registrar avanço real (Template Method) ----------
-
 class RegistrarAvancoRealBase(ABC):
     """O fluxo é fixo; a validação da obra varia por subclasse."""
 
@@ -125,8 +119,6 @@ class RegistrarAvancoRealCDU02(RegistrarAvancoRealBase):
     def _exigir_obra_valida(self, obra: Obra) -> Obra:
         return _obra_cadastrada_em_andamento(self.repositorio, obra)
 
-
-# ---------- Relatório de KPIs ----------
 
 @dataclass(frozen=True)
 class DesvioEtapa:
@@ -263,8 +255,6 @@ class ExibidorRelatorioKPIs:
             )
         return "\n".join(partes) + "\n"
 
-
-# ---------- Engenheiros (login e alocação) ----------
 
 class GerenciarEngenheiros:
     MSG_LOGIN_INVALIDO = "Usuário ou senha inválidos"
