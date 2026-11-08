@@ -24,8 +24,47 @@ Este sistema centraliza o processo:
 |---|---|---|---|
 | Nível 1 | Modelagem completa com UML e vídeo de apresentação | Concluído | - |
 | Nível 2 | Menu totalmente funcional em Tkinter, dados em memória | Concluído | `python main.py` |
-| **Nível 3** | **Funcionamento completo no terminal, com banco de dados** | **Concluído** | `python app_terminal.py` |
-| Nível 4 | Interface gráfica com janelas, botões e estilos personalizados | Planejado | - |
+| Nível 3 | Funcionamento completo no terminal, com banco de dados | Concluído | `python app_terminal.py` |
+| **Nível 4** | **Interface gráfica com janelas, botões e estilos personalizados** | **Concluído** | `python app_gui.py` |
+
+---
+
+## Nível 4: interface gráfica
+
+A mesma lógica do Nível 3 (domínio, banco SQLite e casos de uso) agora com uma interface gráfica feita em Tkinter, com tema visual próprio. Nada da regra de negócio foi duplicado: a tela só chama os casos de uso.
+
+| Login | Painel de obras |
+|---|---|
+| ![Tela de login](docs/login.png) | ![Painel de obras](docs/painel.png) |
+
+| Etapas e recursos | Relatório de KPIs |
+|---|---|
+| ![Etapas e recursos](docs/etapas.png) | ![Relatório de KPIs](docs/kpis.png) |
+
+### Como executar
+
+```bash
+python app_gui.py
+```
+
+Para usar outro arquivo de banco: `python app_gui.py --db meu_banco.db`. O banco é o mesmo do terminal: contas e obras criadas em um aparecem no outro. No Linux, se faltar o Tkinter: `sudo apt install python3-tk`.
+
+### Janelas e telas
+
+| Tela | O que faz |
+|---|---|
+| **Login** | Entrar ou criar conta de engenheiro. Os erros aparecem na própria tela. |
+| **Painel de obras** | Cartões com o total de obras, em andamento e concluídas; tabela com status e barra de progresso. Botões para cadastrar, concluir e alocar-se a uma obra. |
+| **Etapas e recursos** | Escolha a obra, veja as etapas (planejado x real) e, ao selecionar uma etapa, os materiais e equipamentos dela. Botões para nova etapa, novo recurso e registrar avanço real. |
+| **Relatório de KPIs** | Seis cartões (custos, términos e desvios, em verde ou vermelho), tabela de desvios por etapa e gráfico de barras planejado x real. |
+| **Minhas obras** | Obras alocadas ao engenheiro logado. |
+| **Janelas de cadastro** | Janelas modais para nova obra, nova etapa, material/equipamento e avanço real. `Enter` confirma e `Esc` cancela. |
+
+Depois de cada ação bem-sucedida, uma faixa verde no topo confirma o que foi feito. Erros de validação e pré-condições aparecem em caixas de mensagem.
+
+### Estilos personalizados
+
+Todo o visual fica em `tema.py`: paleta de cores, fontes e estilos de botão (primário, secundário, menu lateral, link), tabelas, campos, cartões e barra lateral. Os botões mudam de cor ao passar o mouse e ao clicar, e o campo em foco ganha destaque laranja.
 
 ---
 
@@ -123,30 +162,35 @@ Também há um **Template Method** em `RegistrarAvancoRealBase`: o fluxo de regi
 
 ## Arquitetura e arquivos
 
-O código é dividido em camadas. A regra de negócio não conhece nem o banco nem a tela, o que permite trocar a apresentação no Nível 4 sem mexer no resto.
+O código é dividido em camadas. A regra de negócio não conhece nem o banco nem a tela, e por isso o terminal (Nível 3) e a interface gráfica (Nível 4) usam exatamente o mesmo domínio, repositório e casos de uso.
 
 | Arquivo | Camada | Conteúdo |
 |---|---|---|
 | `dominio.py` | Domínio | Exceções, `Validador`, `Obra`, `Etapa`, `Recurso` (`Material`, `Equipamento`), `Usuario` (`Engenheiro`) |
 | `repositorio.py` | Persistência | `RepositorioSQLite`: criação das tabelas, gravação e leitura das obras e dos usuários |
 | `casos_uso.py` | Aplicação | Cadastros, registrar avanço, concluir obra, relatório de KPIs, login e alocação |
-| `app_terminal.py` | Apresentação | Menu de terminal (login e menu principal) |
-| `test_nivel3.py` | Testes | 16 testes automatizados |
+| `app_terminal.py` | Apresentação (Nível 3) | Menu de terminal (login e menu principal) |
+| `app_gui.py` | Apresentação (Nível 4) | Interface gráfica: login, janela principal, telas e janelas de cadastro |
+| `tema.py` | Apresentação (Nível 4) | Cores, fontes e estilos personalizados da interface |
+| `test_nivel3.py` | Testes | 16 testes do domínio, banco, casos de uso e menu de terminal |
+| `test_nivel4.py` | Testes | 14 testes da interface gráfica |
+| `docs/` | Documentação | Capturas de tela usadas neste README |
 | `main.py` | Apresentação (Nível 2) | Versão Tkinter com dados em memória, mantida como estava |
 
 ### Testes
 
 ```bash
 python -m unittest -v test_nivel3
+python -m unittest -v test_nivel4
 ```
 
-Os testes usam bancos temporários e cobrem persistência entre execuções, regras de negócio, login, alocação e o fluxo completo pelo menu.
+Os testes do Nível 3 usam bancos temporários e cobrem persistência entre execuções, regras de negócio, login, alocação e o fluxo completo pelo menu. Os do Nível 4 abrem a interface de verdade, preenchem os campos, clicam nos botões e conferem tabelas, cartões, mensagens e o que foi gravado no banco. Eles precisam de ambiente gráfico; sem ele, são ignorados.
 
 ---
 
 ## Limitações conhecidas
 
-- O `main.py` (Nível 2) ainda usa dados em memória e tem seu próprio código de domínio. Ele será substituído pela interface gráfica do Nível 4, que reaproveitará `dominio.py`, `repositorio.py` e `casos_uso.py`.
+- O `main.py` (Nível 2) é a versão antiga: usa dados em memória e tem seu próprio código de domínio. Ele foi mantido só como histórico; a versão atual é o `app_gui.py`.
 - Todos os engenheiros enxergam todas as obras; a alocação serve para a opção "Minhas obras".
 
 ---
